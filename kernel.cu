@@ -13,7 +13,7 @@ __global__ void mm_tiled_kernel(float* A, float* B, float* C, unsigned int M, un
     unsigned int col = blockIdx.x*blockDim.x + threadIdx.x;
 
     int tx = threadIdx.x; int ty = threadIdx.y;
-	int bx = blockIdx.x; int by = blockIdx.y;
+	
 
 
     __shared__ float A_s[TILE_DIM][TILE_DIM]; //Ms
@@ -25,17 +25,12 @@ __global__ void mm_tiled_kernel(float* A, float* B, float* C, unsigned int M, un
 if(col < N &&row < M){
     for(unsigned int tile =0; tile <ceilf(K/(float)TILE_DIM) ++ tile){
 
-
-
-        // A_s[threadIdx.y][threadIdx.x] = A[row*N + tile*TILE_DIM + threadIdx.x];
-        // B_s[threadIdx.y][threadIdx.x] = B[(tile*TILE_DIM + threadIdx.y)*N  +col];
-
-        if(row < M && (i*TILE_DIM + tx)<K)
-			A_s[ty][tx] = A[row*K + i*TILE_DIM + tx];
+        if(row < M && (tile*TILE_DIM + tx)<K)
+			A_s[ty][tx] = A[row*K + tile*TILE_DIM + tx];
 		else
 			A_s[ty][tx] = 0;
-		if(column < N && (i*TILE_DIM + ty)<K)
-			B_s[ty][tx] = B[(i*TILE_DIM + ty)*N + column];
+		if(col < N && (tile*TILE_DIM + ty)<K)
+			B_s[ty][tx] = B[(tile*TILE_DIM + ty)*N + col];
 		else
 			B_s[ty][tx] = 0;
 
@@ -48,16 +43,6 @@ if(col < N &&row < M){
     __syncthreads();
     }
     C[row*N + col] = sum;
-    
-
-    // if(col < N &&row < M){
-
-    // for(unsigned int i = 0; i < K; i++){
-    //     sum += A[row*K + i]*B[i*N + col];
-    // }
-    // C[row*N + col] = sum;
-    // }
-
 
 
 }
