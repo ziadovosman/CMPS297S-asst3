@@ -23,7 +23,7 @@ __global__ void mm_tiled_kernel(float* A, float* B, float* C, unsigned int M, un
 
 
 if(col < N &&row < M){
-    for(unsigned int tile =0; tile <ceilf(K/(float)TILE_DIM) ++ tile){
+    for(unsigned int tile =0; tile <ceilf(K/(float)TILE_DIM); ++ tile){
 
         if(row < M && (tile*TILE_DIM + tx)<K)
 			A_s[ty][tx] = A[row*K + tile*TILE_DIM + tx];
